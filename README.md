@@ -2,7 +2,6 @@
 
 ![chatPlus-image](https://github.com/user-attachments/assets/44a89d18-0a03-4198-b3d7-0d4ca7e49f86)
 
-
 # ⭐ Product and User Management
 
 - Real-time Messaging: This chat application enables real-time, two-way communication between users, with seamless message exchange and updates.
@@ -10,6 +9,9 @@
 - User Interaction: Users can select from a list of available users, send messages, and view chat histories, making it ideal for basic chat functionalities.
 
 - Socket.IO Integration: Leveraging Socket.IO, this application provides efficient real-time messaging by connecting users to dedicated rooms based on their usernames.
+
+# 🕸 Screenshot
+![workflow](https://github.com/user-attachments/assets/9022c640-2184-4006-8d09-9c2134985ed2)
 
 
 ## 🛠️ Installation
