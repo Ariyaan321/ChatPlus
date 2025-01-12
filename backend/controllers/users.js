@@ -16,7 +16,7 @@ async function createData(req, res) {
             res.status(409).json("User name already exist's")
         }
         else {
-            await (await User.create(req.body)).save
+            await User.create(req.body).save();
             res.status(201).send("User created successfully")
         }
     } catch {

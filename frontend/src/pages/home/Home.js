@@ -1,22 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
+import MessagesList from '../../components/messages'
+import axios from 'axios';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:8080');
 
 function Home() {
 
     const [msg, setMesg] = useState("");
+    const [messages, setMessages] = useState([]);  // state to store all messages
+    const [clientSideMessage, setClientSideMessage] = useState(true);
     const messageEndRef = useRef(null);
-
-    // This will come from messages.js in component folder
-    const [messages, setMessages] = useState(
-        [
-            ["Lorem ipsum dolor sit amet, consectetur adipiscing elit."],
-            ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod."],
-            ["Lorem ipsum dolor sit amet."],
-            ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."],
-            ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."],
-            ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt."],
-        ]
-    )
-
 
     function handleEnterMessage(e) {
         setMesg(e.target.value)
@@ -28,78 +22,55 @@ function Home() {
             setMesg(msg + "\n");
         }
 
-        else if (e.key === 'Enter' && e.target.value.trim('').length !== 0) {
+        // send to server -> that will send to receiver room
+        else if (e.key === 'Enter' && e.target.value.trim().length !== 0) {
             e.preventDefault();
-            setMessages((prevMessages) => [...prevMessages, [msg]]);
-            setMesg("".trim(''));
+
+            const newMessageObj = {
+                senderUsername: "johndoe",
+                receiverUsername: "mike",
+                message: msg
+            }
+
+            socket.emit('send-Message', newMessageObj);
+            setClientSideMessage(true);
+            setMessages(prevMessages => [...prevMessages, newMessageObj]); // add new message
+            setMesg("");
         }
     }
 
     useEffect(() => {
-        console.log('message end ref: ', messageEndRef);
-        messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }, [messages])
+        socket.emit('join', "johndoe");
+
+        socket.on('receive-Message', (message) => {
+            console.log('in receive message here: ', message);
+            setClientSideMessage(false);
+            setMessages(prevMessages => [...prevMessages, message]); // add received message
+        });
+
+        // Fetch messages from the backend when the component mounts
+        const fetchMessages = async () => {
+            try {
+                const response = await axios.post('http://localhost:8080/message/get', {
+                    senderUsername: 'johndoe',
+                    receiverUsername: 'mike',
+                });
+                console.log('listOfMessages received at frontend with response: ', response);
+                setMessages(response.data); // Assuming the data is returned as an array of messages
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }
+        };
+
+        fetchMessages();
+    }, []);  // Only run once on mount
 
     return (
         <>
             <div className="flex flex-col items-end justify-center w-screen min-h-screen bg-green-300 text-gray-800">
-
                 <div className="flex flex-col flex-grow w-full max-w-5xl bg-white shadow-xl overflow-hidden">
-
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
-
-                        {
-                            messages.map((message, id) => (
-                                id % 2 === 0 ? (
-                                    <div key={id} className="flex w-full mt-2 space-x-3 max-w-xs">
-                                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
-                                        <div>
-                                            <div className="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
-                                                <p>
-                                                    {message.map((line, idx) => (
-                                                        <span key={idx}>
-                                                            {line.split("\n").map((line, index) => (
-                                                                <React.Fragment key={index}>
-                                                                    {line}
-                                                                    <br />
-                                                                </React.Fragment>
-                                                            ))}
-                                                        </span>
-                                                    ))}
-                                                </p>
-                                            </div>
-                                            <span className="text-xs text-gray-500 leading-none">2 min ago</span>
-                                        </div>
-                                    </div>
-                                ) :
-                                    (
-                                        <div key={id} >
-                                            <div className="flex w-full mt-2 space-x-3 max-w-xs ml-auto justify-end">
-                                                <div>
-                                                    <div className="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
-                                                        <p>
-                                                            {message.map((line, idx) => (
-                                                                <span key={idx}>
-                                                                    {line.split("\n").map((line, index) => (
-                                                                        <React.Fragment key={index}>
-                                                                            {line}
-                                                                            <br />
-                                                                        </React.Fragment>
-                                                                    ))}
-                                                                </span>
-                                                            ))}
-                                                        </p>
-                                                    </div>
-                                                    <span className="text-xs text-gray-500 leading-none">2 min ago</span>
-                                                </div>
-                                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
-                                            </div>
-                                        </div>
-
-                                    )
-                            ))
-
-                        }
+                        <MessagesList messages={messages} currentUsername={"johndoe"} />
                         <div ref={messageEndRef} />
                     </div>
 
@@ -112,11 +83,10 @@ function Home() {
                             onKeyDown={handleKeyDown}
                         />
                     </div>
-
                 </div>
             </div>
         </>
-    )
+    );
 }
 
 export default Home;
