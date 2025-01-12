@@ -1,7 +1,6 @@
 const User = require('../models/user')
 
 
-// Assuming you have a simple 'User' model
 async function readAllUsers(req, res) {
     try {
         const users = await User.find(); // Get all users
