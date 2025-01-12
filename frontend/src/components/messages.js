@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-const MessagesList = ({ messages }, currentUsername) => {
+const MessagesList = ({ messages, currentUsername }) => {
 
     // console.log('created at: ', messages);
+    // console.log('messages sender name: ', messages[0]?.senderUsername, " | current name: ", currentUsername);
 
     const timeMin = (timestamp) => {
         const now = new Date();
@@ -15,7 +16,9 @@ const MessagesList = ({ messages }, currentUsername) => {
         const diffInHours = Math.floor(diffInMinutes / 60);
         if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
         const diffInDays = Math.floor(diffInHours / 24);
-        return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+        console.log('diffindays: ', diffInDays);
+        if (diffInDays === "NaN") return '0s ago';
+        else return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
     };
 
 
@@ -30,7 +33,7 @@ const MessagesList = ({ messages }, currentUsername) => {
                                 <div>
                                     <div className="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
                                         <p>
-                                            {message.message.split("\n").map((line, idx) => (
+                                            {message.message && message.message.split("\n").map((line, idx) => (
                                                 <React.Fragment key={idx}>
                                                     {line}
                                                     <br />
@@ -51,7 +54,7 @@ const MessagesList = ({ messages }, currentUsername) => {
                             <div>
                                 <div className="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
                                     <p>
-                                        {message.message.split("\n").map((line, idx) => (
+                                        {message.message && message.message.split("\n").map((line, idx) => (
                                             <React.Fragment key={idx}>
                                                 {line}
                                                 <br />
