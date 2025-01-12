@@ -55,7 +55,7 @@ function Home() {
                     senderUsername: 'johndoe',
                     receiverUsername: 'mike',
                 });
-                console.log('listOfMessages received at frontend with response: ', response);
+                console.log('listOfMessages received at frontend with response: ', response.data);
                 setMessages(response.data); // Assuming the data is returned as an array of messages
             } catch (error) {
                 console.error("Error fetching messages:", error);
@@ -70,7 +70,7 @@ function Home() {
             <div className="flex flex-col items-end justify-center w-screen min-h-screen bg-green-300 text-gray-800">
                 <div className="flex flex-col flex-grow w-full max-w-5xl bg-white shadow-xl overflow-hidden">
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
-                        <MessagesList messages={messages} currentUsername={"johndoe"} />
+                        <MessagesList messages={messages} currentUsername="johndoe" />
                         <div ref={messageEndRef} />
                     </div>
 
