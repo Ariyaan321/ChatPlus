@@ -1,15 +1,11 @@
 const express = require('express')
 const router = express.Router();
 const {
-    readAllData,
+    readAllUsers,
     createData,
-    updateData,
-    deleteData
 } = require('../controllers/users')
 
-router.get('/', readAllData)
+router.get('/', readAllUsers)
     .post('/', createData)
-    .put('/:id', updateData)
-    .delete('/:id', deleteData)
 
 module.exports = router;

@@ -1,13 +1,16 @@
 const User = require('../models/user')
 
-async function readAllData(req, res) {
+
+// Assuming you have a simple 'User' model
+async function readAllUsers(req, res) {
     try {
-        const users = await User.find({})
-        res.status(200).json(users)
-    } catch {
-        res.status(500).json("Some error occured in getting user data")
+        const users = await User.find(); // Get all users
+        console.log('backend: all users: ', users);
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching users' });
     }
-}
+};
 
 async function createData(req, res) {
     try {
@@ -24,39 +27,7 @@ async function createData(req, res) {
     }
 }
 
-async function updateData(req, res) {
-    try {
-        const userNotExist = await User.findOne({ _id: req.params.id })
-        if (!userNotExist) {
-            res.status(409).json("user does not exists")
-        }
-        else {
-            await User.updateOne({ _id: req.params.id }, req.body)
-            res.status(202).json("User updated")
-        }
-    } catch {
-        res.status(500).json("The user_id entered may not be correct")
-    }
-}
-
-async function deleteData(req, res) {
-    try {
-        const userNotExist = await User.findOne({ _id: req.params.id })
-        if (!userNotExist) {
-            res.status(409).json("user does not exists")
-        }
-        else {
-            await User.deleteOne({ _id: req.params.id })
-            res.status(203).json("User deleted successfully")
-        }
-    } catch {
-        res.status(500).json("The user_id entered may not be correct")
-    }
-}
-
 module.exports = {
-    readAllData,
+    readAllUsers,
     createData,
-    updateData,
-    deleteData
 }

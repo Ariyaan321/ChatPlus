@@ -25,7 +25,6 @@ const MessagesList = ({ messages, currentUsername }) => {
     return (
         <div>
             {messages.map((message, index) => (
-                // is it message.senderUsername OR IS IT message[0] ?
                 message.senderUsername === currentUsername ?
                     (
                         <div key={index} >
@@ -67,7 +66,7 @@ const MessagesList = ({ messages, currentUsername }) => {
                         </div>
                     )
             ))
-            };
+            }
         </div>
     )
 }
