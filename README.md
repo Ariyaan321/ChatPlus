@@ -13,7 +13,7 @@ https://drive.google.com/file/d/1kxQCpcfV5WFW9u2mclYKjK9oxeQEAsW1/view?usp=shari
 
 - Socket.IO Integration: Leveraging Socket.IO, this application provides efficient real-time messaging by connecting users to dedicated rooms based on their usernames.
 
-# 🕸 Screenshot
+# 🕸 Working/Flow
 ![workflow](https://github.com/user-attachments/assets/9022c640-2184-4006-8d09-9c2134985ed2)
 
 
