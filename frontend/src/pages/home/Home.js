@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MessagesList from '../../components/messages';
-import UsersList from '../../components/users';
+// import UsersList from '../../components/users'; There is no user for this now
 import axios from 'axios';
 import { io } from 'socket.io-client';
 
@@ -9,24 +9,31 @@ const socket = io('http://localhost:8080');
 function Home() {
     const [msg, setMesg] = useState("");
     const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [senderUser, setSenderUser] = useState(null);
+    const [currentUsers, setCurrentUsers] = useState([]);
+    const [friendsList, setFriendsList] = useState([]);
+    const [exploreList, setExploreList] = useState([]);
+    const [senderUser, setSenderUser] = useState("johndoeF"); // will depend on who log's in
     const [selectedUser, setSelectedUser] = useState(null);
-    const [clientSideMessage, setClientSideMessage] = useState(true);
+    // const [clientSideMessage, setClientSideMessage] = useState(true);
     const messageEndRef = useRef(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/users');
-                setUsers(response.data);
+                const response = await axios.get('http://localhost:8080/users', {
+                    params: { username: senderUser }
+                });
+                console.log('response: ', response);
+                setFriendsList(response.data.friendsList)
+                setExploreList(response.data.exploreList)
             } catch (error) {
                 console.error("Error fetching users:", error);
             }
         };
 
+        // At the time of fetching all users, we seperate the ones that are not friend
         fetchUsers();
-    }, []);
+    }, [senderUser]);
 
     useEffect(() => {
         if (selectedUser) {
@@ -66,7 +73,7 @@ function Home() {
             };
 
             socket.emit('send-Message', newMessageObj);
-            setClientSideMessage(true);
+            // setClientSideMessage(true);
             setMessages(prevMessages => [...prevMessages, newMessageObj]);
             setMesg("");
         }
@@ -76,9 +83,9 @@ function Home() {
         setSelectedUser(receiverUsername);
     };
 
-    const handleSenderUserClick = (senderUsername) => {
-        setSenderUser(senderUsername);
-    };
+    // const handleSenderUserClick = (senderUsername) => {
+    //     setSenderUser(senderUsername);
+    // };
 
     // Scroll to the bottom when a new message is added
     useEffect(() => {
@@ -108,20 +115,24 @@ function Home() {
                 </div>
 
                 <div className="flex flex-col w-[33%] bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4">
-                    <h3 className="text-lg font-semibold">Users List</h3>
+                    <h3 className="text-lg font-semibold">Friends List</h3>
                     <ul>
-                        {users.map(user => (
+                        {currentUsers.map((user, index) => (
                             <li
-                                key={user._id}
-                                onClick={() => handleUserClick(user.Username)}
+                                key={index}
+                                onClick={() => handleUserClick(user)}
                                 className="cursor-pointer p-2 hover:bg-gray-300"
                             >
-                                {user.Username}
+                                {user}
                             </li>
                         ))}
                     </ul>
 
-                    <p><b>Select sender user</b></p>
+                    <div className='mt-10'>
+                        <button onClick={() => setCurrentUsers(friendsList)}>Friends</button>
+                        <button onClick={() => setCurrentUsers(exploreList)} className='pl-10'>Explore</button>
+                    </div>
+                    {/* <p><b>Select sender user</b></p>
                     <ul>
                         {users.map(user => (
                             <li
@@ -132,7 +143,7 @@ function Home() {
                                 {user.Username}
                             </li>
                         ))}
-                    </ul>
+                    </ul> */}
                 </div>
             </div>
         </>
