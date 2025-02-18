@@ -16,10 +16,10 @@ async function getMessage(req, res) {
 
         console.log('finding existing convo');
         // Find the conversation between the two participants
-        let conversation = await Conversation.findOne({
-            participants: { $all: participants },
-        });
+        let conversation = await Conversation.findOne({ participants: [participants[0], participants[1]] });
         console.log('found a convo and it is: ', conversation);
+
+        // ------ IF they are friends and no convo, then print something in chat -> if(converssation === null)
 
         if (!conversation) {
             return res.status(404).json({ message: 'No conversation found' });
@@ -30,7 +30,7 @@ async function getMessage(req, res) {
             '_id': { $in: conversation.messages }
         });
 
-        console.log('Returning list of messages to frontend:', listOfMessages);
+        // console.log('Returning list of messages to frontend:', listOfMessages);
 
         // Return the list of messages
         res.status(200).json(listOfMessages);

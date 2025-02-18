@@ -15,6 +15,14 @@ const userSchema = new Schema(
             type: String,
             default: "",
         },
+        friends: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                default: [],
+                required: true,
+            },
+        ]
     }, { timestamps: true }
 );
 
