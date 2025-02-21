@@ -12,8 +12,10 @@ function Home() {
     const [currentUsers, setCurrentUsers] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [exploreList, setExploreList] = useState([]);
+    const [conversationAvailable, setConversationAvailable] = useState(true);
     const [senderUser, setSenderUser] = useState("johndoeF"); // will depend on who log's in
     const [selectedUser, setSelectedUser] = useState(null);
+    const [sidebarWidth, setSidebarWidth] = useState('60%'); // Default width
     // const [clientSideMessage, setClientSideMessage] = useState(true);
     const messageEndRef = useRef(null);
 
@@ -43,9 +45,14 @@ function Home() {
                         senderUsername: senderUser,
                         receiverUsername: selectedUser,
                     });
-                    setMessages(response.data);
+                    console.log('response on front: ', response);
+                    if (response.data === "!!") {
+                        setConversationAvailable(false)
+                    } else {
+                        setMessages(response.data);
+                    }
                 } catch (error) {
-                    console.error("Error fetching messages:", error);
+                    console.error("No conversation found:", error);
                 }
             };
 
@@ -97,9 +104,20 @@ function Home() {
     return (
         <>
             <div className="flex flex-col items-end justify-center w-screen min-h-screen bg-green-300 text-gray-800">
-                <div className="flex flex-col flex-grow w-full max-w-5xl bg-white shadow-xl overflow-hidden">
+                <div className="flex flex-col flex-grow bg-white shadow-xl overflow-hidden" //max-w-5xl
+                    style={{ minWidth: sidebarWidth }}
+                >
+                    {/* <div
+                    className="flex flex-col flex-grow max-w-5xl bg-white shadow-xl overflow-hidden"
+                    style={{ marginLeft: `${sidebarWidth}px` }} // Adjusts dynamically
+                > */}
+
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
-                        <MessagesList messages={messages} currentUsername={senderUser} />
+                        {!conversationAvailable ?
+                            <p>No conversation found</p>
+                            :
+                            <MessagesList messages={messages} currentUsername={senderUser} />
+                        }
                         <div ref={messageEndRef} />
                     </div>
 
@@ -114,8 +132,14 @@ function Home() {
                     </div>
                 </div>
 
-                <div className="flex flex-col w-[33%] bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4">
-                    <h3 className="text-lg font-semibold">Friends List</h3>
+                {/* <div className="flex flex-col w-[33%] bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4"> */}
+                {/* <div className="flex flex-col bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4 resize-x overflow-auto min-w-[200px] max-w-[50%]"> */}
+                <div
+                    className='flex flex-col bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4 resize-x overflow-auto min-w-[400px] max-w-[50%]'
+                // style={{ width: `${sidebarWidth}px` }}
+                // onChange={(e) => setSidebarWidth(Math.max(200, Math.min(e.clientX, window.innerWidth * 0.5)))}
+                >
+
                     <ul>
                         {currentUsers.map((user, index) => (
                             <li
@@ -128,8 +152,8 @@ function Home() {
                         ))}
                     </ul>
 
-                    <div className='mt-10'>
-                        <button onClick={() => setCurrentUsers(friendsList)}>Friends</button>
+                    <div className='mt-auto border-8 border-red-400'>
+                        <button onClick={() => setCurrentUsers(friendsList)} className='border-red-600'>Friends</button>
                         <button onClick={() => setCurrentUsers(exploreList)} className='pl-10'>Explore</button>
                     </div>
                     {/* <p><b>Select sender user</b></p>
@@ -145,7 +169,7 @@ function Home() {
                         ))}
                     </ul> */}
                 </div>
-            </div>
+            </div >
         </>
     );
 }
