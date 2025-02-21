@@ -4,7 +4,6 @@ const User = require('../models/user')
 async function readAllUsers(req, res) {
     try {
         const users = await User.find(); // Get all users
-        console.log('readdAllUsers: ', req.query);
         const senderUser = req.query.username;
         senderUserSchema = await User.findOne({ Username: senderUser })
         friendsOfSenderUser = senderUserSchema.friends

@@ -21,11 +21,13 @@ async function getMessage(req, res) {
 
         // ------ IF they are friends and no convo, then print something in chat -> if(converssation === null)
 
-        if (!conversation) {
-            return res.status(404).json({ message: 'No conversation found' });
+        if (conversation === undefined || conversation == null) {
+            console.log('in undefined');
+            return res.status(200).json('!!');
         }
 
         // Fetch the list of messages from the conversation
+        console.log('in listofnessages');
         const listOfMessages = await Message.find({
             '_id': { $in: conversation.messages }
         });
@@ -33,6 +35,7 @@ async function getMessage(req, res) {
         // console.log('Returning list of messages to frontend:', listOfMessages);
 
         // Return the list of messages
+        console.log('retuning here');
         res.status(200).json(listOfMessages);
     } catch (error) {
         console.error('Error fetching messages:', error);
