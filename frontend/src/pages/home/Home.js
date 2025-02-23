@@ -36,6 +36,7 @@ function Home() {
     }, [senderUser]);
 
     useEffect(() => {
+        // only "selectedUser" in dependency arr then "if" required !?        
         if (selectedUser) {
             const fetchMessages = async () => {
                 try {
@@ -101,11 +102,13 @@ function Home() {
     return (
         <>
             <div className="flex flex-col items-end justify-center w-screen min-h-screen bg-green-300 text-gray-800">
-                <div className='flex flex-col flex-grow bg-white w-[65%] min-w-[40%] max-w-[65%] shadow-xl overflow-hidden'
-                >
+                <div className='flex flex-col flex-grow bg-white w-[65%] min-w-[40%] max-w-[65%] shadow-xl overflow-hidden'>
 
-                    <div className='flex items-center border-4 border-red-500 w-full h-[60px] bg-green-500'>
-                        <span>account</span>
+                    {/* Profile photo */}
+                    <div className='flex items-center gap-3 font-bold border-4 border-red-500 w-full p-3 pl-6 bg-green-500'>
+                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
+                        <div>James Bond</div>
+                        {/* <div>{selectedUser}</div> */}
                     </div>
 
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
@@ -129,7 +132,7 @@ function Home() {
                 </div>
 
                 {/* <div className="flex flex-col w-[33%] bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4"> */}
-                <div className="flex flex-col bg-gray-800 self-start absolute h-screen border-s-violet-600 border-r-yellow-500 border-4 overflow-auto min-w-[537px] max-w-[35%]" // max 1535px
+                <div className="flex flex-col bg-gray-800 self-start absolute h-screen border-s-violet-600 border-r-yellow-500 border-4 overflow-auto min-w-[537px] max-w-[35%]" // max screen width 1535px
 
                 >
 
