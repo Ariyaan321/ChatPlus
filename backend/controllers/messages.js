@@ -12,6 +12,7 @@ async function getMessage(req, res) {
         console.log('sender and receiver are: ', senderUsername + " : " + receiverUsername);
 
         // Sort the participants array to maintain a consistent order
+        // When inserting in "conversation" model I am inserting sender first then receiver, does this mean I still have to sort ?
         const participants = [senderUsername, receiverUsername].sort();
 
         console.log('finding existing convo');
@@ -65,6 +66,7 @@ async function handleSendMessage(senderUsername, receiverUsername, messageConten
             participants: { $all: [senderUsername, receiverUsername] },
         });
 
+        // if user decline request -> remove user from friends list & conversation
         if (!conversation) {
             conversation = await Conversation.create({
                 participants: [senderUsername, receiverUsername],

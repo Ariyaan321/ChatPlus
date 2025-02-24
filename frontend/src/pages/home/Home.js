@@ -3,6 +3,7 @@ import MessagesList from '../../components/messages';
 // import UsersList from '../../components/users'; There is no user for this now
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { request } from 'express';
 
 const socket = io('http://localhost:8080');
 
@@ -12,6 +13,7 @@ function Home() {
     const [currentUsers, setCurrentUsers] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [exploreList, setExploreList] = useState([]);
+    const [friendsListSelected, setFriendsListSelected] = useState(true)
     const [conversationAvailable, setConversationAvailable] = useState(true);
     const [senderUser, setSenderUser] = useState("johndoeF"); // will depend on who log's in
     const [selectedUser, setSelectedUser] = useState(null);
@@ -62,7 +64,7 @@ function Home() {
         }
     }, [selectedUser, senderUser]);
 
-    function handleEnterMessage(e) {
+    function handleTypingMessage(e) {
         setMesg(e.target.value);
     }
 
@@ -80,16 +82,44 @@ function Home() {
             };
 
             socket.emit('send-Message', newMessageObj);
-            // setClientSideMessage(true);
             setMessages(prevMessages => [...prevMessages, newMessageObj]);
             setMesg("");
         }
+    }
+
+    function selectFriendsList(e) {
+        e.preventDefault();
+        setFriendsListSelected(true)
+        setCurrentUsers(friendsList)
+    }
+    function selectExploreList(e) {
+        e.preventDefault();
+        setFriendsListSelected(false)
+        setCurrentUsers(exploreList)
     }
 
     const handleUserClick = (receiverUsername) => {
         setSelectedUser(receiverUsername);
     };
 
+    // For new message notification - receive message
+    useEffect(() => {
+        // fun needed ? can just start with socket.on !?
+        // The "data" received below will come from another user, this not same as newMessageObj above ; the newMessageObj above is for this senderUser only
+        socket.on('receive-Message', (data) => {
+            // this setMessages should handle "messages" correctly sinces message.senderUsername has changed in latest instance !?
+            setMessages(prevMessages => [...prevMessages, data])
+            if (selectedUser !== data.senderUsername) { // notification
+                // change friendsList or currentUsers ?
+                // trying to change friendsList only
+                let friendIndex = friendsList.findIndex(([name]) => name === data.senderUsername)
+                if (friendIndex !== -1) { // will not be -1 since checking done from backend
+                    friendsList[friendIndex] = ++friendsList[friendIndex][1]
+                }
+            }
+        })
+
+    })
 
     // Scroll to the bottom when a new message is added
     useEffect(() => {
@@ -125,7 +155,7 @@ function Home() {
                             className="flex items-center w-full h-14 p-1 rounded text-sm mt-2 outline-none resize-none"
                             placeholder="Type your message…"
                             value={msg}
-                            onChange={handleEnterMessage}
+                            onChange={handleTypingMessage}
                             onKeyDown={handleKeyDown}
                         />
                     </div>
@@ -138,19 +168,42 @@ function Home() {
 
                     <ul>
                         {currentUsers.map((user, index) => (
-                            <li
-                                key={index}
-                                onClick={() => handleUserClick(user)}
-                                className="cursor-pointer p-2 hover:bg-gray-300"
-                            >
-                                {user}
-                            </li>
+                            <div className='flex justify-between'>
+                                <li
+                                    key={index}
+                                    onClick={() => handleUserClick(user)}
+                                    className="cursor-pointer p-2 hover:bg-gray-300"
+                                >
+                                    {
+                                        selectFriendsList === true ?
+                                            // if no unread convo then return userName only
+                                            user[0]
+                                            :
+                                            user
+                                    }
+                                </li>
+
+                                {
+                                    selectFriendsList === true ?
+
+                                        user[1] === 0 ?
+                                            null
+                                            :
+                                            <div className='w-4 rounded-lg bg-red-600 text-white font-bold'>
+                                                {user[1]}
+                                            </div>
+
+                                        :
+                                        <div className='w-5 rounded-lg text-2xl bg-black text-white'>+</div>
+                                }
+
+                            </div>
                         ))}
                     </ul>
 
                     <div className='mt-auto flex justify-between bg-emerald-400 text-2xl font-bold'>
-                        <button onClick={() => setCurrentUsers(friendsList)} className='border-4 border-red-600 w-[50%] py-5'>Friends</button>
-                        <button onClick={() => setCurrentUsers(exploreList)} className='border-4 border-purple-600 w-[50%] py-5'>Explore</button>
+                        <button onClick={selectFriendsList} className='border-4 border-red-600 w-[50%] py-5'>Friends</button>
+                        <button onClick={selectExploreList} className='border-4 border-purple-600 w-[50%] py-5'>Explore</button>
                     </div>
                 </div>
             </div >
@@ -159,3 +212,12 @@ function Home() {
 }
 
 export default Home;
+
+
+// 2 notification's schema will be of following types:-
+// 1) Connection request - required >  username only (data in this db will expire after 5 days)
+// 2) New message from friend -> username only ; if not selectedUser
+
+// need to test following:
+// 1) testing send and receive messages
+// 2) testing notification system

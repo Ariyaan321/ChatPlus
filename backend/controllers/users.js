@@ -16,7 +16,7 @@ async function readAllUsers(req, res) {
             // console.log('part id: ', participant._id, "   ++    ", participant.Username);
             if (participant.Username != senderUser) {
                 if (friendsOfSenderUser.includes(participant._id)) {
-                    friendsList.push(participant.Username)
+                    friendsList.push([participant.Username, 0])
                 }
                 else {
                     exploreList.push(participant.Username)
