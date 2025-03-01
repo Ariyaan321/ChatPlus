@@ -60,7 +60,8 @@ io.on('connection', (socket) => {
 
             const savedMessage = await handleSendMessage(senderUsername, receiverUsername, message);
             console.log('message successfully saved in DB: ', savedMessage);
-            io.to(receiverUsername).emit('receive-Message', data);
+            socket.to(receiverUsername).emit('receive-Message', data);
+            console.log('LOOP------------');
 
         } catch (e) {
             console.log('Error in socket sendMessage: ', e.message);

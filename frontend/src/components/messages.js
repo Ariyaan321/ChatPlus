@@ -3,22 +3,45 @@ import React, { useEffect, useState } from 'react';
 const MessagesList = ({ messages, currentUsername }) => {
 
     // console.log('created at: ', messages);
+
     // console.log('messages sender name: ', messages[0]?.senderUsername, " | current name: ", currentUsername);
 
+    // const timeMin = (timestamp) => {
+    //     if (!timestamp) return "unknown time"
+
+    //     const now = new Date();
+    //     const createdAt = new Date(timestamp);
+    //     const diffInMs = now - createdAt; // Difference in milliseconds
+    //     const diffInMinutes = Math.floor(diffInMs / (1000 * 60)); // Convert to minutes
+
+    //     if (diffInMinutes < 1) return "Just now";
+    //     else if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+    //     const diffInHours = Math.floor(diffInMinutes / 60);
+    //     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    //     const diffInDays = Math.floor(diffInHours / 24);
+    //     console.log('diffindays: ', diffInDays);
+    //     if (isNaN(diffInDays)) return '0s ago';
+    //     else return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    // };
+
     const timeMin = (timestamp) => {
+        if (!timestamp) return "0s ago"; // Handle undefined/null cases
+
         const now = new Date();
         const createdAt = new Date(timestamp);
-        const diffInMs = now - createdAt; // Difference in milliseconds
-        const diffInMinutes = Math.floor(diffInMs / (1000 * 60)); // Convert to minutes
+        if (isNaN(createdAt.getTime())) return "Invalid time"; // Check for invalid dates
+
+        const diffInMs = now - createdAt;
+        const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
 
         if (diffInMinutes < 1) return "Just now";
         if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+
         const diffInHours = Math.floor(diffInMinutes / 60);
         if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+
         const diffInDays = Math.floor(diffInHours / 24);
-        console.log('diffindays: ', diffInDays);
-        if (diffInDays === "NaN") return '0s ago';
-        else return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+        return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
     };
 
 
@@ -42,7 +65,8 @@ const MessagesList = ({ messages, currentUsername }) => {
                                     </div>
                                     <span className="text-xs text-gray-500 leading-none">{timeMin(message.createdAt)}</span>
                                 </div>
-                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
+                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-
+                                300"></div>
                             </div>
                         </div>
                     )
