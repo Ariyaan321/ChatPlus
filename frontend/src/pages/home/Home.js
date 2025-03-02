@@ -10,15 +10,20 @@ function Home() {
     const [msg, setMesg] = useState("");
     const [messages, setMessages] = useState([]);
     const [currentUsers, setCurrentUsers] = useState([]);
-    const [friendsList, setFriendsList] = useState([]);
+    const [friendsList, setFriendsList] = useState({});
     const [exploreList, setExploreList] = useState([]);
     const [friendsListSelected, setFriendsListSelected] = useState(true)
-    const [conversationAvailable, setConversationAvailable] = useState(true);
-    const [senderUser, setSenderUser] = useState("johndoeF"); // will depend on who log's in
+    const [senderUser, setSenderUser] = useState("johny"); // will depend on who log's in
     const [selectedUser, setSelectedUser] = useState(null);
     const messageEndRef = useRef(null);
-
+    const isFirstRender = useRef(true)
     useEffect(() => {
+
+        // restricts first render, may have to remove this in production
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return; // Prevents running on first mount
+        }
 
         const fetchUsers = async () => {
             console.log('senderUser useEffect triggered');
@@ -117,43 +122,25 @@ function Home() {
         }
     };
 
-    // For new message notification - receive message  || need useEffect() for this ? why not just socket.on ?
-    // fun needed ? can just start with socket.on !?
-    // The "data" received below will come from another user, this not same as newMessageObj above ; the newMessageObj above is for this senderUser only
-    // socket.on('receive-Message', (data) => {
-    //     // this setMessages should handle "messages" correctly since message.senderUsername has changed in latest instance !?
-    //     console.log('receive-Message: ', data);
-    //     let newMessages = messages.push(data)
-    //     setMessages(newMessages)
-    //     // setMessages(prevMessages => [...prevMessages, data])
-    //     if (selectedUser !== data.senderUsername) { // notification
-    //         // change friendsList or currentUsers ?
-    //         // trying to change friendsList only
-    //         let friendIndex = friendsList.findIndex(([name]) => name === data.senderUsername)
-    //         if (friendIndex !== -1) { // will not be -1 since checking done from backend
-    //             friendsList[friendIndex] = ++friendsList[friendIndex][1]
-    //         }
-    //     }
-    // })
+
 
     useEffect(() => {
+        // The "data" received below will come from another user, this not same as newMessageObj above ; the newMessageObj above is for this senderUser only
 
         const handleReceiveMessage = (data) => {
-            // if(selectedUser)
             console.log('receive-Message: ', data);
-            setMessages(prevMessages => [...prevMessages, data]);
-            // setMessages(prevMessages => {
-            //     const alreadyExists = prevMessages.some(msg => msg.message === data.message && msg.senderUsername === data.senderUsername);
-            //     return alreadyExists ? prevMessages : [...prevMessages, data];
-            // });
+            if (selectedUser === data.senderUsername) {
+                setMessages(prevMessages => [...prevMessages, data]);
+            }
 
+            // storing messageNotification in DB comes here
+            else {
+                // we send +1 request to backend socket => that will increment in DB ->  and send to receiverUser socket
+                // this way we don't need to rely on updating the friendsList completely !
+                // update receiver's unreadcount in friendsList
+                friendsList[data.senderUsername] += 1;
+                socket.emit('message-notification', [])
 
-            if (selectedUser !== data.senderUsername) { // notification
-                setFriendsList(prevFriendsList => {
-                    return prevFriendsList.map(friend =>
-                        friend[0] === data.senderUsername ? [friend[0], friend[1] + 1] : friend
-                    );
-                });
             }
         };
 
@@ -163,6 +150,12 @@ function Home() {
             socket.off('receive-Message', handleReceiveMessage); // Cleanup listener
         };
     }, []); // No dependecny so run only once
+
+    // useEffect to handle incrementing of messageNotification using socket
+
+
+
+    // some socket to handle requestNotification
 
 
 
@@ -226,7 +219,6 @@ function Home() {
                                 >
                                     {
                                         friendsListSelected === true ?
-                                            // if no unread convo then return userName only
                                             user[0]
                                             :
                                             user
@@ -236,6 +228,7 @@ function Home() {
                                 {
                                     friendsListSelected === true ?
 
+                                        // if no unread convo then return userName only
                                         user[1] === 0 ?
                                             null
                                             :
@@ -252,8 +245,10 @@ function Home() {
                     </ul>
 
                     <div className='w-fit bg-red-500 text-white text-1xl flex flex-col'>
-                        <button onClick={() => setSenderUser("johndoeF")}>johndoeF</button>
-                        <button onClick={() => setSenderUser("mikeF")}>mikeF</button>
+                        {/* <button onClick={() => setSenderUser("johny")}>johny</button>
+                        <button onClick={() => setSenderUser("mikey")}>mikey</button> */}
+                        {/* <button onClick={handleUserSwitch("johny")}>johny</button>
+                        <button onClick={handleUserSwitch("mikey")}>mikey</button> */}
                     </div>
 
                     <div className='mt-auto flex justify-between bg-emerald-400 text-2xl font-bold'>

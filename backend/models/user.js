@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const userSchema = new Schema(
     {
-        Username: {
+        username: {
             type: String,
             required: true
         },
@@ -22,7 +22,13 @@ const userSchema = new Schema(
                 default: [],
                 required: true,
             },
-        ]
+        ],
+        messageNotification: [
+            {
+                username: { type: String, required: true },
+                unreadcount: { type: Number, default: 0, required: true },
+            }
+        ],
     }, { timestamps: true }
 );
 

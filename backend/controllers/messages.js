@@ -49,8 +49,8 @@ async function handleSendMessage(senderUsername, receiverUsername, messageConten
     try {
         console.log('HERE IN HANDLE SEND MESSAGE');
 
-        const sender = await User.findOne({ Username: senderUsername });
-        const receiver = await User.findOne({ Username: receiverUsername });
+        const sender = await User.findOne({ username: senderUsername });
+        const receiver = await User.findOne({ username: receiverUsername });
 
         if (!sender || !receiver) {
             throw new Error("Sender or Receiver not found.");
