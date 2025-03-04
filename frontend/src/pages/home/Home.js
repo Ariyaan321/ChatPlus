@@ -45,6 +45,10 @@ function Home() {
     }, [senderUser]);
 
     useEffect(() => {
+        console.log('friendsList is: ', friendsList);
+    }, [friendsList])
+
+    useEffect(() => {
         // only "selectedUser" in dependency arr then "if" required !?        
         if (selectedUser) {
             const fetchMessages = async () => {
@@ -54,12 +58,7 @@ function Home() {
                         receiverUsername: selectedUser,
                     });
                     console.log('response on front: ', response);
-                    // if (response.data === "!!") {
-                    //     setConversationAvailable(false)
-                    // } else {
-                    //     setConversationAvailable(true)
                     setMessages(response.data);
-                    // }
                 } catch (error) {
                     console.error("No conversation found:", error);
                 }
@@ -94,12 +93,6 @@ function Home() {
         }
     }
 
-    // useEffect(() => {
-    //     if(friendsListSelected === true){
-
-    //     }
-    // }, [friendsList])
-
     function selectFriendsList(e) {
         e.preventDefault();
         setFriendsListSelected(true)
@@ -114,12 +107,7 @@ function Home() {
     }
 
     const handleUserClick = (receiverUsername) => {
-        if (friendsListSelected === true) {
-            setSelectedUser(receiverUsername[0]);
-        }
-        else {
-            setSelectedUser(receiverUsername);
-        }
+        setSelectedUser(receiverUsername);
     };
 
 
@@ -206,50 +194,105 @@ function Home() {
 
                 {/* <div className="flex flex-col w-[33%] bg-gray-200 p-4 self-start absolute h-screen border-s-violet-600 border-4"> */}
                 <div className="flex flex-col bg-gray-800 self-start absolute h-screen border-s-violet-600 border-r-yellow-500 border-4 overflow-auto min-w-[537px] max-w-[35%]" // max screen width 1535px
-
                 >
-
                     <ul>
-                        {currentUsers.map((user, index) => (
-                            <div className='flex justify-between text-white bg-blue-300 w-fit'>
-                                <li
-                                    key={index}
-                                    onClick={() => handleUserClick(user)}
-                                    className="cursor-pointer p-2 hover:bg-gray-300"
-                                >
-                                    {
-                                        friendsListSelected === true ?
-                                            user[0]
-                                            :
-                                            user
-                                    }
-                                </li>
+                        {
+                            friendsListSelected ?
+                                Object.entries(friendsList).map(([user, value], index) => (
+                                    <div className='flex justify-between items-center text-white bg-blue-300 w-fit'>
+                                        <li
+                                            key={index}
+                                            onClick={() => handleUserClick(user)}
+                                            className="cursor-pointer p-2 hover:bg-gray-300"
+                                        >
+                                            {user}
+                                        </li>
 
-                                {
-                                    friendsListSelected === true ?
+                                        {
+                                            value === 0 || undefined ?
+                                                null
+                                                :
+                                                <div className='w-4 rounded-lg bg-red-600 text-white font-bold ml-4'>
+                                                    {value}
+                                                </div>
+                                        }
 
-                                        // if no unread convo then return userName only
-                                        user[1] === 0 ?
-                                            null
-                                            :
-                                            <div className='w-4 rounded-lg bg-red-600 text-white font-bold'>
-                                                {user[1]}
-                                            </div>
+                                    </div>
+                                ))
 
-                                        :
+                                :
+
+                                exploreList.map((user, index) => (
+                                    <div className='flex justify-between text-white bg-blue-300 w-fit'>
+                                        <li
+                                            key={index}
+                                            onClick={() => handleUserClick(user)}
+                                            className="cursor-pointer p-2 hover:bg-gray-300"
+                                        >
+                                            {user}
+                                        </li>
+
                                         <div className='w-5 rounded-lg text-2xl bg-black text-white cursor-pointer'>+</div>
-                                }
 
-                            </div>
-                        ))}
+                                    </div>
+                                ))
+                        }
                     </ul>
 
-                    <div className='w-fit bg-red-500 text-white text-1xl flex flex-col'>
-                        {/* <button onClick={() => setSenderUser("johny")}>johny</button>
+                    {/* <ul>
+                        {friendsListSelected &&
+                        {
+                            for(let user in friendsList) {
+                                console.log('user is: ', user, ' || ', friendsList[user]);
+                            }
+                        }
+                                :
+                        null
+
+
+                        }
+
+                        {!!friendsListSelected &&
+                            currentUsers.map((user, index) => (
+                                <div className='flex justify-between text-white bg-blue-300 w-fit'>
+                                    <li
+                                        key={index}
+                                        onClick={() => handleUserClick(user)}
+                                        className="cursor-pointer p-2 hover:bg-gray-300"
+                                    >
+                                        {
+                                            friendsListSelected === true ?
+                                                user[0]
+                                                :
+                                                user
+                                        }
+                                    </li>
+
+                                    {
+                                        friendsListSelected === true ?
+
+                                            // if no unread convo then return userName only
+                                            user[1] === 0 ?
+                                                null
+                                                :
+                                                <div className='w-4 rounded-lg bg-red-600 text-white font-bold'>
+                                                    {user[1]}
+                                                </div>
+
+                                            :
+                                            <div className='w-5 rounded-lg text-2xl bg-black text-white cursor-pointer'>+</div>
+                                    }
+
+                                </div>
+                            ))}
+                    </ul> */}
+
+                    {/* <div className='w-fit bg-red-500 text-white text-1xl flex flex-col'> */}
+                    {/* <button onClick={() => setSenderUser("johny")}>johny</button>
                         <button onClick={() => setSenderUser("mikey")}>mikey</button> */}
-                        {/* <button onClick={handleUserSwitch("johny")}>johny</button>
+                    {/* <button onClick={handleUserSwitch("johny")}>johny</button>
                         <button onClick={handleUserSwitch("mikey")}>mikey</button> */}
-                    </div>
+                    {/* </div> */}
 
                     <div className='mt-auto flex justify-between bg-emerald-400 text-2xl font-bold'>
                         <button onClick={selectFriendsList} className='border-4 border-red-600 w-[50%] py-5'>Friends</button>

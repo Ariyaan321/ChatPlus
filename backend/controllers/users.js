@@ -30,7 +30,7 @@ async function readAllUsers(req, res) {
                 }
             }
         }
-        console.log('friends: ', Object.keys(friendsList));
+        console.log('friends: ', friendsList);
         console.log('explore: ', exploreList);
         // for (participant in users && participant.username !== senderUser) {
         //     console.log('firendArr and ExploreArr: ', "   ", friendsArr, "  ++++ ", exploreArr);
