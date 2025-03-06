@@ -21,6 +21,7 @@ const io = new Server(server, {
 const userRouter = require('./routes/users');
 const messageRouter = require('./routes/messages');
 const { handleSendMessage } = require('./controllers/messages')
+const { updateMessageNotification } = require('./controllers/users')
 
 app.use(cors())
 app.use(express.json());
@@ -65,6 +66,18 @@ io.on('connection', (socket) => {
 
         } catch (e) {
             console.log('Error in socket sendMessage: ', e.message);
+        }
+    })
+
+    socket.on('message-notification-1', async ({ data, status }) => {
+        try {
+            const { senderUsername, receiverUsername, message } = data;
+            // increase unreacount of senderUsername inside receiverUsername's messageNotification
+            let response = await updateMessageNotification(senderUsername, receiverUsername, status)
+            console.log(response);
+        }
+        catch (e) {
+            console.log('Error in message-notification-1 : ', e.message);
         }
     })
 

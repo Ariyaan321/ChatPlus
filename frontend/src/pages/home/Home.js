@@ -42,6 +42,7 @@ function Home() {
 
         // At the time of fetching all users, we seperate the ones that are not friend
         fetchUsers();
+        socket.emit('join', senderUser);
     }, [senderUser]);
 
     useEffect(() => {
@@ -50,7 +51,7 @@ function Home() {
 
     useEffect(() => {
         // only "selectedUser" in dependency arr then "if" required !?        
-        if (selectedUser) {
+        if (selectedUser !== null) {
             const fetchMessages = async () => {
                 try {
                     const response = await axios.post('http://localhost:8080/message/get', {
@@ -59,13 +60,24 @@ function Home() {
                     });
                     console.log('response on front: ', response);
                     setMessages(response.data);
+                    // unread messages becomes 0
+                    setFriendsList(prev => ({
+                        ...prev,
+                        [selectedUser]: 0
+                    }));
+                    const rdata = {
+                        senderUsername: senderUser,
+                        receiverUsername: selectedUser,
+                        message: "ggeretsae",
+                    }
+                    socket.emit("message-notification-1", { data: rdata, status: 0 })
                 } catch (error) {
                     console.error("No conversation found:", error);
                 }
             };
 
             fetchMessages();
-            socket.emit('join', senderUser);
+            // socket.emit('join', senderUser);
             socket.emit('join', selectedUser);
         }
     }, [selectedUser, senderUser]);
@@ -96,14 +108,14 @@ function Home() {
     function selectFriendsList(e) {
         e.preventDefault();
         setFriendsListSelected(true)
-        setCurrentUsers(friendsList)
+        // setCurrentUsers(friendsList)
     }
     function selectExploreList(e) {
-        console.log('explore');
+        // console.log('explore');
         e.preventDefault();
         console.log('explore2');
         setFriendsListSelected(false)
-        setCurrentUsers(exploreList)
+        // setCurrentUsers(exploreList)
     }
 
     const handleUserClick = (receiverUsername) => {
@@ -114,20 +126,33 @@ function Home() {
 
     useEffect(() => {
         // The "data" received below will come from another user, this not same as newMessageObj above ; the newMessageObj above is for this senderUser only
+        // acc. to above logic, can I remove "if" from setMessages ? since effect only receiver ?
 
         const handleReceiveMessage = (data) => {
+            console.log('in receive message here in console-------');
             console.log('receive-Message: ', data);
-            if (selectedUser === data.senderUsername) {
-                setMessages(prevMessages => [...prevMessages, data]);
+            if (selectedUser !== null) {
+                if (selectedUser === data.senderUsername) {
+                    setMessages(prevMessages => [...prevMessages, data]);
+                }
             }
 
             // storing messageNotification in DB comes here
             else {
                 // we send +1 request to backend socket => that will increment in DB ->  and send to receiverUser socket
                 // this way we don't need to rely on updating the friendsList completely !
-                // update receiver's unreadcount in friendsList
-                friendsList[data.senderUsername] += 1;
-                socket.emit('message-notification', [])
+                // update receiver's unreadcount in friendsList   
+                // FLOW :-
+                // 1) senderUser = data > selectedUser
+                // 2) on selectedUser(senderUser) side: -
+                //  i) selectedUser not data.senderUser => friendsList[data.senderUser]++  =>  senderUser 
+                // gets unread noti so, senderUsers -> notificationMessage contains data.senderUser unreadCount
+                setFriendsList(prev => ({
+                    ...prev,
+                    [data.senderUsername]: (prev[data.senderUsername] || 0) + 1
+                }));
+
+                socket.emit('message-notification-1', { data, status: 1 })
 
             }
         };
@@ -239,60 +264,13 @@ function Home() {
                         }
                     </ul>
 
-                    {/* <ul>
-                        {friendsListSelected &&
-                        {
-                            for(let user in friendsList) {
-                                console.log('user is: ', user, ' || ', friendsList[user]);
-                            }
-                        }
-                                :
-                        null
 
-
-                        }
-
-                        {!!friendsListSelected &&
-                            currentUsers.map((user, index) => (
-                                <div className='flex justify-between text-white bg-blue-300 w-fit'>
-                                    <li
-                                        key={index}
-                                        onClick={() => handleUserClick(user)}
-                                        className="cursor-pointer p-2 hover:bg-gray-300"
-                                    >
-                                        {
-                                            friendsListSelected === true ?
-                                                user[0]
-                                                :
-                                                user
-                                        }
-                                    </li>
-
-                                    {
-                                        friendsListSelected === true ?
-
-                                            // if no unread convo then return userName only
-                                            user[1] === 0 ?
-                                                null
-                                                :
-                                                <div className='w-4 rounded-lg bg-red-600 text-white font-bold'>
-                                                    {user[1]}
-                                                </div>
-
-                                            :
-                                            <div className='w-5 rounded-lg text-2xl bg-black text-white cursor-pointer'>+</div>
-                                    }
-
-                                </div>
-                            ))}
-                    </ul> */}
-
-                    {/* <div className='w-fit bg-red-500 text-white text-1xl flex flex-col'> */}
-                    {/* <button onClick={() => setSenderUser("johny")}>johny</button>
-                        <button onClick={() => setSenderUser("mikey")}>mikey</button> */}
-                    {/* <button onClick={handleUserSwitch("johny")}>johny</button>
+                    <div className='w-fit bg-red-500 text-white text-1xl flex flex-col'>
+                        <button onClick={() => setSenderUser("johny")}>johny</button>
+                        <button onClick={() => setSenderUser("mikey")}>mikey</button>
+                        {/* <button onClick={handleUserSwitch("johny")}>johny</button>
                         <button onClick={handleUserSwitch("mikey")}>mikey</button> */}
-                    {/* </div> */}
+                    </div>
 
                     <div className='mt-auto flex justify-between bg-emerald-400 text-2xl font-bold'>
                         <button onClick={selectFriendsList} className='border-4 border-red-600 w-[50%] py-5'>Friends</button>
@@ -312,5 +290,4 @@ export default Home;
 // 2) New message from friend -> username only ; if not selectedUser
 
 // need to test following:
-// 1) testing send and receive messages
-// 2) testing notification system
+// 1) working of messages & conversation after notification feature

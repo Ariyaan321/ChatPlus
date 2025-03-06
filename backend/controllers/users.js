@@ -83,16 +83,61 @@ const inUnreadMessages = async (sender, receiver) => {
         // else return 0        
     }
     catch (e) {
-        console.log('error in unreadMessages: ', e);
+        console.log('error in unreadMessages: ', e.message);
         return 0;
     }
     // if (found) return true;
     // else return false;
 }
 
+const updateMessageNotification = async (sender, receiver, status) => {
+    try {
+        if (status === 0) {
+            await User.updateOne(
+                { username: sender },
+                { $pull: { messageNotification: { username: receiver } } }
+            );
+            return "messageNotification deleted";
+        }
+
+        else {
+            let found = await User.findOne({
+                "username": receiver,
+                "messageNotification.username": sender,
+            });
+            console.log('umn: found is: ', found);
+            // [0] is not the right way , only targets index 0 !? no sense
+            // console.log('umn user for: ', found.username, ' - is: ', found.messageNotification[0].unreadcount);
+            if (found) {
+                console.log('in found.username here');
+                const index = found.messageNotification.findIndex(n => n.username === sender);
+                if (index !== -1) {
+                    console.log('in unm incrementor here');
+                    found.messageNotification[index].unreadcount += 1;
+                    await found.save();
+                    console.log('sending unm repsonse now');
+                    return "UPDATED MESSAGE NOTIFICATION 1";
+                }
+            }
+            else {
+                // If sender does NOT exist in messageNotification, add new entry
+                await User.updateOne(
+                    { username: receiver },
+                    { $push: { messageNotification: { username: sender, unreadcount: 1 } } }
+                );
+                return "ADDED NEW MESSAGE NOTIFICATION 1";
+            }
+        }
+    }
+    catch (e) {
+        console.log('error in updateMessNoti: ', e.message);
+        return "Error occured in updateMessageNotification "
+    }
+}
+
 
 module.exports = {
     readAllUsers,
     createData,
-    inUnreadMessages
+    updateMessageNotification,
 }
