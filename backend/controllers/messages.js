@@ -67,9 +67,10 @@ async function handleSendMessage(senderUsername, receiverUsername, messageConten
         });
 
         // if user decline request -> remove user from friends list & conversation
+        const participantsS = [senderUsername, receiverUsername].sort();
         if (!conversation) {
             conversation = await Conversation.create({
-                participants: [senderUsername, receiverUsername],
+                participants: participantsS,
                 messages: [message._id],
             });
         } else {

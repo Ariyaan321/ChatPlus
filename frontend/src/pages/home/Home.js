@@ -113,7 +113,6 @@ function Home() {
     function selectExploreList(e) {
         // console.log('explore');
         e.preventDefault();
-        console.log('explore2');
         setFriendsListSelected(false)
         // setCurrentUsers(exploreList)
     }
@@ -129,13 +128,13 @@ function Home() {
         // acc. to above logic, can I remove "if" from setMessages ? since effect only receiver ?
 
         const handleReceiveMessage = (data) => {
-            console.log('in receive message here in console-------');
+            console.log('hrm , selectedUser: ', selectedUser, ' |  data.sender: ', data.senderUsername);
             console.log('receive-Message: ', data);
-            if (selectedUser !== null) {
-                if (selectedUser === data.senderUsername) {
-                    setMessages(prevMessages => [...prevMessages, data]);
-                }
+            // if (selectedUser !== null) {
+            if (selectedUser === data.senderUsername) {
+                setMessages(prevMessages => [...prevMessages, data]);
             }
+            // }
 
             // storing messageNotification in DB comes here
             else {
@@ -162,7 +161,7 @@ function Home() {
         return () => {
             socket.off('receive-Message', handleReceiveMessage); // Cleanup listener
         };
-    }, []); // No dependecny so run only once
+    }, [selectedUser]); // No dependecny so run only once
 
     // useEffect to handle incrementing of messageNotification using socket
 
@@ -193,8 +192,8 @@ function Home() {
                     {/* Profile photo */}
                     <div className='flex items-center gap-3 font-bold border-4 border-red-500 w-full p-3 pl-6 bg-green-500'>
                         <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
-                        <div>James Bond</div>
-                        {/* <div>{selectedUser}</div> */}
+                        {/* <div>James Bond</div> */}
+                        <div>{selectedUser}</div>
                     </div>
 
                     <div className="flex flex-col flex-grow h-0 p-4 overflow-auto">
