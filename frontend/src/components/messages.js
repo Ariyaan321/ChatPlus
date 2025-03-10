@@ -65,8 +65,7 @@ const MessagesList = ({ messages, currentUsername }) => {
                                     </div>
                                     <span className="text-xs text-gray-500 leading-none">{timeMin(message.createdAt)}</span>
                                 </div>
-                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-
-                                300"></div>
+                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300"></div>
                             </div>
                         </div>
                     )

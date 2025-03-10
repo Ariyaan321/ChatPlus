@@ -71,6 +71,7 @@ io.on('connection', (socket) => {
 
     socket.on('message-notification-1', async ({ data, status }) => {
         try {
+            console.log('message-notification-1 reached here');
             const { senderUsername, receiverUsername, message } = data;
             // increase unreacount of senderUsername inside receiverUsername's messageNotification
             let response = await updateMessageNotification(senderUsername, receiverUsername, status)

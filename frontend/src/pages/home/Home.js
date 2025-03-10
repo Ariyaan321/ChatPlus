@@ -99,6 +99,9 @@ function Home() {
                 message: msg,
             };
 
+            if (messages === "!!") {
+                setMessages([]);
+            }
             setMessages(prevMessages => [...prevMessages, newMessageObj]);
             setMesg("");
             socket.emit('send-Message', newMessageObj);
@@ -130,29 +133,34 @@ function Home() {
         const handleReceiveMessage = (data) => {
             console.log('hrm , selectedUser: ', selectedUser, ' |  data.sender: ', data.senderUsername);
             console.log('receive-Message: ', data);
-            // if (selectedUser !== null) {
-            if (selectedUser === data.senderUsername) {
-                setMessages(prevMessages => [...prevMessages, data]);
+
+            if (senderUser === data.receiverUsername) {
+                if (selectedUser === data.senderUsername) {
+                    setMessages(prevMessages => [...prevMessages, data])
+                }
+
+                // storing messageNotification in DB comes here
+                else {
+                    // we send +1 request to backend socket => that will increment in DB ->  and send to receiverUser socket
+                    // this way we don't need to rely on updating the friendsList completely !
+                    // update receiver's unreadcount in friendsList   
+                    // FLOW :-
+                    // 1) senderUser = data > selectedUser
+                    // 2) on selectedUser(senderUser) side: -
+                    //  i) selectedUser not data.senderUser => friendsList[data.senderUser]++  =>  senderUser 
+                    // gets unread noti so, senderUsers -> notificationMessage contains data.senderUser unreadCount
+                    setFriendsList(prev => ({
+                        ...prev,
+                        [data.senderUsername]: (prev[data.senderUsername] || 0) + 1
+                    }));
+
+                    socket.emit('message-notification-1', { data, status: 1 })
+
+                }
             }
-            // }
-
-            // storing messageNotification in DB comes here
             else {
-                // we send +1 request to backend socket => that will increment in DB ->  and send to receiverUser socket
-                // this way we don't need to rely on updating the friendsList completely !
-                // update receiver's unreadcount in friendsList   
-                // FLOW :-
-                // 1) senderUser = data > selectedUser
-                // 2) on selectedUser(senderUser) side: -
-                //  i) selectedUser not data.senderUser => friendsList[data.senderUser]++  =>  senderUser 
-                // gets unread noti so, senderUsers -> notificationMessage contains data.senderUser unreadCount
-                setFriendsList(prev => ({
-                    ...prev,
-                    [data.senderUsername]: (prev[data.senderUsername] || 0) + 1
-                }));
-
+                console.log('front - message-noti-1');
                 socket.emit('message-notification-1', { data, status: 1 })
-
             }
         };
 
@@ -288,5 +296,7 @@ export default Home;
 // 1) Connection request - required >  username only (data in this db will expire after 5 days)
 // 2) New message from friend -> username only ; if not selectedUser
 
+
 // need to test following:
-// 1) working of messages & conversation after notification feature
+// 1) message notification for unselected senderUser
+// 2) connection request
