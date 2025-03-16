@@ -62,6 +62,21 @@ async function createData(req, res) {
     }
 }
 
+async function connectionRequestSend(req, res) {
+    console.log('1: in connection request send');
+    try {
+        // we get friend that 'user' wants to connect with
+        // Now that friend(user) requestList contains 'initial user'
+        // fire socket to friend frontend when this complete
+
+
+    }
+    catch (e) {
+        console.log('Error occured in connection request: ', e.message);
+        return res.status().json(`Error occured in connection request: ${e.message}`);
+    }
+}
+
 const inUnreadMessages = async (sender, receiver) => {
     console.log('in unread messages for: ', sender, ' && ', receiver);
     try {

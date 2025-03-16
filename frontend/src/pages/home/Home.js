@@ -9,7 +9,6 @@ const socket = io('http://localhost:8080');
 function Home() {
     const [msg, setMesg] = useState("");
     const [messages, setMessages] = useState([]);
-    const [currentUsers, setCurrentUsers] = useState([]);
     const [friendsList, setFriendsList] = useState({});
     const [exploreList, setExploreList] = useState([]);
     const [friendsListSelected, setFriendsListSelected] = useState(true)
@@ -135,6 +134,7 @@ function Home() {
             console.log('receive-Message: ', data);
 
             if (senderUser === data.receiverUsername) {
+                console.log('in HRM == here');
                 if (selectedUser === data.senderUsername) {
                     setMessages(prevMessages => [...prevMessages, data])
                 }
@@ -148,12 +148,26 @@ function Home() {
                     // 1) senderUser = data > selectedUser
                     // 2) on selectedUser(senderUser) side: -
                     //  i) selectedUser not data.senderUser => friendsList[data.senderUser]++  =>  senderUser 
-                    // gets unread noti so, senderUsers -> notificationMessage contains data.senderUser unreadCount
-                    setFriendsList(prev => ({
-                        ...prev,
-                        [data.senderUsername]: (prev[data.senderUsername] || 0) + 1
-                    }));
+                    // gets unread noti so, senderUsers -> notificationMessage contains data.senderUser unreadCount                  
+                    console.log('sorting starts here');
+                    setFriendsList(prev => {
 
+                        // incrementing unread message
+                        const updatedList = {
+                            ...prev,
+                            [data.senderUsername]: (prev[data.senderUsername] || 0) + 1
+                        };
+
+                        // sorting based on unread message, to displayed at top of list
+                        const sortedList = Object.entries(updatedList).sort((a, b) => b[1] - a[1]);
+
+                        // change back to object
+                        const sortedObject = Object.fromEntries(sortedList);
+
+
+                        return sortedObject;
+                    })
+                    // testing sorting
                     socket.emit('message-notification-1', { data, status: 1 })
 
                 }
@@ -169,14 +183,18 @@ function Home() {
         return () => {
             socket.off('receive-Message', handleReceiveMessage); // Cleanup listener
         };
-    }, [selectedUser]); // No dependecny so run only once
+    }, [selectedUser]);
 
     // useEffect to handle incrementing of messageNotification using socket
 
 
 
     // some socket to handle requestNotification
-
+    // when user click on explore friend profile then :-
+    // 1) that friend should be added in users requestList and removed from users exploreList
+    // 2) data in requestList will be displayed in div on "Friends" section
+    // 3) if user accepts friend in requestList then:-
+    //   i) the friend is inserted in users friendsList - ii) removed from users requestList
 
 
     // const sendConnectionRequest = (e) => {

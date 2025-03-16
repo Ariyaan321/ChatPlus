@@ -23,6 +23,14 @@ const userSchema = new Schema(
                 required: true,
             },
         ],
+        request: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                default: [],
+                required: true
+            }
+        ],
         messageNotification: [
             {
                 username: { type: String, required: true },
