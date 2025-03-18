@@ -62,18 +62,29 @@ async function createData(req, res) {
     }
 }
 
-async function connectionRequestSend(req, res) {
+async function connectionRequestSend(sender, receiver) {
     console.log('1: in connection request send');
     try {
         // we get friend that 'user' wants to connect with
         // Now that friend(user) requestList contains 'initial user'
         // fire socket to friend frontend when this complete
-
-
+        const receiverUser = User.findOne({ username: receiver });
+        if (!receiverUser) {
+            return "receiver not found !"
+        }
+        else {
+            await receiverUser.insertOne({
+                request: {
+                    username: receiver,
+                    action: 1,
+                }
+            })
+            return "request added in DB"
+        }
     }
     catch (e) {
         console.log('Error occured in connection request: ', e.message);
-        return res.status().json(`Error occured in connection request: ${e.message}`);
+        return "error";
     }
 }
 
@@ -155,4 +166,5 @@ module.exports = {
     readAllUsers,
     createData,
     updateMessageNotification,
+    connectionRequestSend,
 }

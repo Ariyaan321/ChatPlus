@@ -11,6 +11,7 @@ function Home() {
     const [messages, setMessages] = useState([]);
     const [friendsList, setFriendsList] = useState({});
     const [exploreList, setExploreList] = useState([]);
+    const [requestList, setRequestList] = useState({});
     const [friendsListSelected, setFriendsListSelected] = useState(true)
     const [senderUser, setSenderUser] = useState("johny"); // will depend on who log's in
     const [selectedUser, setSelectedUser] = useState(null);
@@ -191,16 +192,46 @@ function Home() {
 
     // some socket to handle requestNotification
     // when user click on explore friend profile then :-
-    // 1) that friend should be added in users requestList and removed from users exploreList
+    // 1) that friend should be removed from users exploreList
     // 2) data in requestList will be displayed in div on "Friends" section
     // 3) if user accepts friend in requestList then:-
     //   i) the friend is inserted in users friendsList - ii) removed from users requestList
+    // 4) need to update users.js controller too
+
+    const connectionRequestSend = (receiver) => {
+        // setExploreList(prev =>
+        //     prev === receiver ? null : prev
+        // )
+        // setRequestList(prev => [...prev, { receiver: 0 }])
+        socket.emit('connection-request-send', {
+            senderUser: senderUser,
+            receiverUser: receiver,
+        })
 
 
-    // const sendConnectionRequest = (e) => {
-    //     e.preventDefault();
-    //     console.log('e conn. req: ', e);
-    // }
+    }
+
+    useEffect(() => {
+        const receiveConnectionRequest = (data) => {
+            // i. add sender in this users requestList
+            // ii. remove sender from this users exploreList
+
+        }
+
+        socket.on('sth', receiveConnectionRequest)
+
+        return (() => socket.off('sth'))
+    }, [])
+
+    const acceptRequest = (user) => {
+        // setRequestList(prev => prev === user ? null : prev)
+        // setFriendsList(prev => 
+        //     ...prev,
+        //     { user: 0 }
+        // )
+
+    }
+
 
     // Scroll to the bottom when a new message is added
     useEffect(() => {
@@ -247,6 +278,33 @@ function Home() {
                 >
                     <ul>
                         {
+                            Object.entries(requestList).length !== 0 ?
+                                Object.entries(requestList).map(([user, action]) => (
+                                    <>
+                                        <div className='flex justify-between items-center text-white bg-blue-300 w-fit'>
+                                            {user}
+                                            {
+                                                action === 0 ? // withdraw
+                                                    <div className='flex gap-4'>
+                                                        <div>⏲</div>
+                                                        <div>❌</div>
+                                                    </div>
+                                                    :
+                                                    <div className='flex gap-4'>
+                                                        <div onClick={acceptRequest(user)}>✅</div>
+                                                        <div>❌</div>
+                                                    </div>
+                                            }
+                                            {/* can I bring ❌ here ? */}
+                                        </div>
+                                    </>
+
+                                ))
+                                :
+                                null
+                        }
+
+                        {
                             friendsListSelected ?
                                 Object.entries(friendsList).map(([user, value], index) => (
                                     <div className='flex justify-between items-center text-white bg-blue-300 w-fit'>
@@ -276,13 +334,15 @@ function Home() {
                                     <div className='flex justify-between text-white bg-blue-300 w-fit'>
                                         <li
                                             key={index}
-                                            onClick={() => handleUserClick(user)}
                                             className="cursor-pointer p-2 hover:bg-gray-300"
                                         >
                                             {user}
                                         </li>
 
-                                        <div className='w-5 rounded-lg text-2xl bg-black text-white cursor-pointer'>+</div>
+                                        <div
+                                            className='w-5 rounded-lg text-2xl bg-black text-white cursor-pointer'
+                                            onClick={() => connectionRequestSend(user)}
+                                        >+</div>
 
                                     </div>
                                 ))
@@ -316,5 +376,5 @@ export default Home;
 
 
 // need to test following:
-// 1) message notification for unselected senderUser
-// 2) connection request
+// 1) add new user based on updated schema
+// 2) test connectionRequests

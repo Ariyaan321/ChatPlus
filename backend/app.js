@@ -21,7 +21,7 @@ const io = new Server(server, {
 const userRouter = require('./routes/users');
 const messageRouter = require('./routes/messages');
 const { handleSendMessage } = require('./controllers/messages')
-const { updateMessageNotification } = require('./controllers/users')
+const { updateMessageNotification, connectionRequestSend } = require('./controllers/users')
 
 app.use(cors())
 app.use(express.json());
@@ -80,6 +80,19 @@ io.on('connection', (socket) => {
         catch (e) {
             console.log('Error in message-notification-1 : ', e.message);
         }
+    })
+
+    socket.on('connection-request-send', async ({ senderUser, receiverUser }) => {
+        console.log('in connection-req-send');
+        // save sender's request in receiver's DB
+        let response = await connectionRequestSend(senderUser, receiverUser);
+        if (response === "error") {
+
+        }
+        else {
+
+        }
+        console.log(response);
     })
 
     socket.on('disconnect', () => {

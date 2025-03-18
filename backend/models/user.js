@@ -25,10 +25,8 @@ const userSchema = new Schema(
         ],
         request: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-                default: [],
-                required: true
+                username: { type: String, required: true },
+                action: { type: Number, required: true },
             }
         ],
         messageNotification: [
